@@ -13,14 +13,6 @@ A secure, high-performance internal administration panel for managing the IETECH
 - **Universal Dual-Image Engine:** Groundbreaking embedded pipeline allowing admins to either paste living image links OR upload local files. Local files are instantly processed and converted into Base64 strings on the client to circumvent standard storage bottlenecks, mapping directly to native MongoDB string schemas.
 - **Real-Time Data Previews:** Instant visual thumbnail generation upon pasting media links or uploading files to prevent blind publications.
 
-## 🎨 Design & Architecture
-
-The dashboard is engineered to look spectacularly modern, utilizing:
-- **Glassmorphism:** Elegant, frosted-glass table structures overlapping dynamic backgrounds.
-- **Adaptive Theming:** Flawless Light/Dark mode toggling connected globally via Tailwind CSS Variables (`@theme`). Form inputs, overlays, and matrices intelligently invert based on system preferences.
-- **The Global Matrix (`FallingPattern`):** A lightweight, optimized HTML5 Canvas rendering engine providing the trademark green Matrix-rain effect seamlessly in the background without dropping frames.
-- **Consistent Typography:** Strict standardization of `Space Grotesk` and `JetBrains Mono` across all tables, placeholders, and interactive moduli.
-
 ## 🚀 Getting Started
 
 ### Prerequisites
