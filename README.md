@@ -1,73 +1,56 @@
-# React + TypeScript + Vite
+# IETECH Admin Platform ⚡
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A secure, high-performance internal administration panel for managing the IETECH (GDG IET Lucknow) ecosystem. Built with a heavy focus on speed, aesthetics, and optimal user experience.
 
-Currently, two official plugins are available:
+## ✨ Core Capabilities
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Secure Authentication:** JWT-based robust authentication system ensuring safe access to sensitive endpoints.
+- **Dynamic Module Management:** Complete Create, Read, Update, and Delete (CRUD) pipelines for:
+  - 👥 Team Members
+  - 📅 Events
+  - 💻 Open Source Projects
+  - 📝 Blogs 
+- **Universal Dual-Image Engine:** Groundbreaking embedded pipeline allowing admins to either paste living image links OR upload local files. Local files are instantly processed and converted into Base64 strings on the client to circumvent standard storage bottlenecks, mapping directly to native MongoDB string schemas.
+- **Real-Time Data Previews:** Instant visual thumbnail generation upon pasting media links or uploading files to prevent blind publications.
 
-## React Compiler
+## 🎨 Design & Architecture
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The dashboard is engineered to look spectacularly modern, utilizing:
+- **Glassmorphism:** Elegant, frosted-glass table structures overlapping dynamic backgrounds.
+- **Adaptive Theming:** Flawless Light/Dark mode toggling connected globally via Tailwind CSS Variables (`@theme`). Form inputs, overlays, and matrices intelligently invert based on system preferences.
+- **The Global Matrix (`FallingPattern`):** A lightweight, optimized HTML5 Canvas rendering engine providing the trademark green Matrix-rain effect seamlessly in the background without dropping frames.
+- **Consistent Typography:** Strict standardization of `Space Grotesk` and `JetBrains Mono` across all tables, placeholders, and interactive moduli.
 
-## Expanding the ESLint configuration
+## 🚀 Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Prerequisites
+Make sure you have [Node.js](https://nodejs.org/) installed along with your favorite package manager (npm, yarn, bun). The backend API servers must be running or configured before testing authentication locally.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Installation
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/GDG-IET-LUCKNOW/admin.git
+   cd admin
+   ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+3. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+4. **Build for production:**
+   ```bash
+   npm run build
+   ```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 🔒 Security Note
+The temporary development login bypass has been **disabled**. All access strictly requires live authorization tokens verified against the `https://gdg-backend-dx5f.onrender.com` server environment. Emulated or mocked tokens will instantly fail.
+
+---
+*Developed with focus and precision for GDG IET Lucknow.*
