@@ -18,9 +18,10 @@ export const ProjectsPage = () => {
     title: "",
     description: "",
     githubLink: "",
-    techStack: "", // stored as comma separated string
-    mediaUrl: ""
+    techStack: "",
+    mediaUrls: [] as string[]
   });
+  const [linkInput, setLinkInput] = useState("");
 
   const fetchProjects = async () => {
     try {
@@ -40,7 +41,8 @@ export const ProjectsPage = () => {
 
   const openAddModal = () => {
     setEditingId(null);
-    setFormData({ title: "", description: "", githubLink: "", techStack: "", mediaUrl: "" });
+    setFormData({ title: "", description: "", githubLink: "", techStack: "", mediaUrls: [] });
+    setLinkInput("");
     setIsModalOpen(true);
   };
 
@@ -51,8 +53,9 @@ export const ProjectsPage = () => {
       description: project.description,
       githubLink: project.githubLink || "",
       techStack: Array.isArray(project.techStack) ? project.techStack.join(", ") : project.techStack || "",
-      mediaUrl: project.media?.[0]?.url || ""
+      mediaUrls: project.media?.map((m: any) => m.url) || []
     });
+    setLinkInput("");
     setIsModalOpen(true);
   };
 
@@ -76,7 +79,7 @@ export const ProjectsPage = () => {
       description: formData.description,
       githubLink: formData.githubLink,
       techStack: formData.techStack.split(",").map(t => t.trim()).filter(Boolean),
-      media: formData.mediaUrl ? [{ type: "image", url: formData.mediaUrl }] : []
+      media: formData.mediaUrls.map(url => ({ type: "image", url }))
     };
 
     try {
@@ -96,12 +99,14 @@ export const ProjectsPage = () => {
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 10 * 1024 * 1024) { alert("File is too large (max 10MB)."); return; }
-    const reader = new FileReader();
-    reader.onloadend = () => setFormData(prev => ({ ...prev, mediaUrl: reader.result as string }));
-    reader.readAsDataURL(file);
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    files.forEach(file => {
+      if (file.size > 10 * 1024 * 1024) { alert(`File ${file.name} is too large (max 10MB).`); return; }
+      const reader = new FileReader();
+      reader.onloadend = () => setFormData(prev => ({ ...prev, mediaUrls: [...prev.mediaUrls, reader.result as string] }));
+      reader.readAsDataURL(file);
+    });
   };
 
   return (
@@ -221,24 +226,60 @@ export const ProjectsPage = () => {
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-bold text-foreground/80 uppercase tracking-widest">Cover Image</label>
-                  {formData.mediaUrl && <button type="button" onClick={() => setFormData({...formData, mediaUrl: ""})} className="text-xs font-bold text-red-500 hover:text-red-400 uppercase tracking-wider">Remove Image</button>}
+                  <label className="block text-sm font-bold text-foreground/80 uppercase tracking-widest">Media</label>
+                  {formData.mediaUrls.length > 0 && <button type="button" onClick={() => { setFormData({...formData, mediaUrls: []}); setLinkInput(""); }} className="text-xs font-bold text-red-500 hover:text-red-400 uppercase tracking-wider">Clear All</button>}
                 </div>
-                
-                {formData.mediaUrl ? (
-                  <div className="w-full h-32 rounded-xl overflow-hidden border border-glass-border bg-glass">
-                     <img src={formData.mediaUrl} alt="Cover Preview" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/800x400?text=Invalid+Image+Link' }} />
-                  </div>
-                ) : (
-                  <div className="flex items-center space-x-3">
-                    <input type="url" value={formData.mediaUrl} onChange={e => setFormData({...formData, mediaUrl: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="Paste link or click upload ->" />
-                    <label className="shrink-0 bg-white/5 hover:bg-white/10 border border-glass-border px-5 py-3 rounded-xl cursor-pointer transition-all font-bold flex items-center space-x-2 text-foreground/80 hover:text-foreground">
-                      <Upload className="w-4 h-4" />
-                      <span className="text-sm">Upload</span>
-                      <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
-                    </label>
+
+                {/* Image previews grid */}
+                {formData.mediaUrls.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2 mb-3">
+                    {formData.mediaUrls.map((url, i) => (
+                      <div key={i} className="w-full h-24 rounded-xl overflow-hidden border border-glass-border bg-glass relative group">
+                        <img src={url} alt={`Preview ${i}`} className="w-full h-full object-cover" />
+                        <button type="button" onClick={() => setFormData(p => ({...p, mediaUrls: p.mediaUrls.filter((_, idx) => idx !== i)}))} className="absolute top-1 right-1 bg-black/50 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                          <X className="w-3 h-3 text-white" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
+
+                {/* Always-visible add options */}
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="url"
+                    value={linkInput}
+                    onChange={e => setLinkInput(e.target.value)}
+                    placeholder="Paste image link and press Enter"
+                    className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm"
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (linkInput.trim()) {
+                          setFormData(p => ({ ...p, mediaUrls: [...p.mediaUrls, linkInput.trim()] }));
+                          setLinkInput("");
+                        }
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (linkInput.trim()) {
+                        setFormData(p => ({ ...p, mediaUrls: [...p.mediaUrls, linkInput.trim()] }));
+                        setLinkInput("");
+                      }
+                    }}
+                    className="shrink-0 bg-primary/20 hover:bg-primary/30 border border-primary/30 px-4 py-3 rounded-xl font-bold text-primary text-sm transition-all"
+                  >
+                    Add
+                  </button>
+                  <label className="shrink-0 bg-white/5 hover:bg-white/10 border border-glass-border px-5 py-3 rounded-xl cursor-pointer transition-all font-bold flex items-center space-x-2 text-foreground/80 hover:text-foreground">
+                    <Upload className="w-4 h-4" />
+                    <span className="text-sm">Upload</span>
+                    <input type="file" accept="image/*" multiple onChange={handleFileUpload} className="hidden" />
+                  </label>
+                </div>
               </div>
 
               <div className="pt-6 flex justify-end space-x-3 border-t border-glass-border mt-6">

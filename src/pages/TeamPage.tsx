@@ -19,6 +19,8 @@ export const TeamPage = () => {
     domainName: "",
     branch: "",
     year: "",
+    github: "",
+    linkedin: "",
     status: "active",
     priority: 1
   });
@@ -41,7 +43,7 @@ export const TeamPage = () => {
 
   const openAddModal = () => {
     setEditingId(null);
-    setFormData({ name: "", domainName: "", branch: "", year: "", status: "active", priority: 1 });
+    setFormData({ name: "", domainName: "", branch: "", year: "", github: "", linkedin: "", status: "active", priority: 1 });
     setIsModalOpen(true);
   };
 
@@ -52,6 +54,8 @@ export const TeamPage = () => {
       domainName: member.domainName || "",
       branch: member.branch || "",
       year: member.year || "",
+      github: member.github || "",
+      linkedin: member.linkedin || "",
       status: member.status || "active",
       priority: member.priority || 1
     });
@@ -198,6 +202,17 @@ export const TeamPage = () => {
                 <div>
                   <label className="block text-sm font-medium mb-1.5 text-foreground/80">Year</label>
                   <input required value={formData.year} onChange={e => setFormData({...formData, year: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="e.g. 3rd" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1.5 text-foreground/80">Github URL</label>
+                  <input value={formData.github} onChange={e => setFormData({...formData, github: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="https://github.com/..." />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1.5 text-foreground/80">LinkedIn URL</label>
+                  <input value={formData.linkedin} onChange={e => setFormData({...formData, linkedin: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="https://linkedin.com/..." />
                 </div>
               </div>
 

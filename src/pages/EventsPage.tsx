@@ -18,9 +18,13 @@ export const EventsPage = () => {
     title: "",
     description: "",
     date: "",
+    time: "",
+    location: "",
+    capacity: "",
     registrationLink: "",
-    mediaUrl: ""
+    mediaUrls: [] as string[]
   });
+  const [linkInput, setLinkInput] = useState("");
 
   const fetchEvents = async () => {
     try {
@@ -40,7 +44,8 @@ export const EventsPage = () => {
 
   const openAddModal = () => {
     setEditingId(null);
-    setFormData({ title: "", description: "", date: "", registrationLink: "", mediaUrl: "" });
+    setFormData({ title: "", description: "", date: "", time: "", location: "", capacity: "", registrationLink: "", mediaUrls: [] });
+    setLinkInput("");
     setIsModalOpen(true);
   };
 
@@ -49,10 +54,14 @@ export const EventsPage = () => {
     setFormData({
       title: event.title,
       description: event.description,
-      date: new Date(event.date).toISOString().split('T')[0], // yyyy-mm-dd format
+      date: new Date(event.date).toISOString().split('T')[0],
+      time: event.time || "",
+      location: event.location || "",
+      capacity: event.capacity?.toString() || "",
       registrationLink: event.registrationLink || "",
-      mediaUrl: event.media?.[0]?.url || ""
+      mediaUrls: event.media?.map((m: any) => m.url) || []
     });
+    setLinkInput("");
     setIsModalOpen(true);
   };
 
@@ -76,8 +85,11 @@ export const EventsPage = () => {
       title: formData.title,
       description: formData.description,
       date: formData.date,
+      time: formData.time,
+      location: formData.location,
+      capacity: formData.capacity ? parseInt(formData.capacity) : undefined,
       registrationLink: formData.registrationLink,
-      media: formData.mediaUrl ? [{ type: "image", url: formData.mediaUrl }] : []
+      media: formData.mediaUrls.map(url => ({ type: "image", url }))
     };
 
     try {
@@ -97,12 +109,15 @@ export const EventsPage = () => {
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 10 * 1024 * 1024) { alert("File is too large (max 10MB)."); return; }
-    const reader = new FileReader();
-    reader.onloadend = () => setFormData(prev => ({ ...prev, mediaUrl: reader.result as string }));
-    reader.readAsDataURL(file);
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    
+    files.forEach(file => {
+      if (file.size > 10 * 1024 * 1024) { alert(`File ${file.name} is too large (max 10MB).`); return; }
+      const reader = new FileReader();
+      reader.onloadend = () => setFormData(prev => ({ ...prev, mediaUrls: [...prev.mediaUrls, reader.result as string] }));
+      reader.readAsDataURL(file);
+    });
   };
 
   return (
@@ -132,7 +147,8 @@ export const EventsPage = () => {
               <tr className="border-b border-glass-border bg-white/5">
                 <th className="p-4 font-medium text-foreground/70">Event Name</th>
                 <th className="p-4 font-medium text-foreground/70">Date</th>
-                <th className="p-4 font-medium text-foreground/70">Registration</th>
+                <th className="p-4 font-medium text-foreground/70">Time</th>
+                <th className="p-4 font-medium text-foreground/70">Location</th>
                 <th className="p-4 font-medium text-foreground/70 text-right">Actions</th>
               </tr>
             </thead>
@@ -154,16 +170,8 @@ export const EventsPage = () => {
                     >
                       <td className="p-4 font-medium">{event.title}</td>
                       <td className="p-4 text-foreground/80">{new Date(event.date).toLocaleDateString()}</td>
-                      <td className="p-4">
-                        {event.registrationLink ? (
-                          <a href={event.registrationLink} target="_blank" rel="noreferrer" className="text-primary hover:underline flex items-center space-x-1">
-                            <LinkIcon className="w-3 h-3" />
-                            <span>Link</span>
-                          </a>
-                        ) : (
-                          <span className="text-foreground/40">None</span>
-                        )}
-                      </td>
+                      <td className="p-4 text-foreground/80">{event.time || "—"}</td>
+                      <td className="p-4 text-foreground/80">{event.location || "—"}</td>
                       <td className="p-4 text-right">
                         <div className="flex justify-end space-x-2">
                           <button onClick={() => openEditModal(event)} className="p-2 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 rounded-lg transition-colors">
@@ -186,13 +194,13 @@ export const EventsPage = () => {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-background border border-glass-border rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
-            <div className="p-6 border-b border-glass-border flex justify-between items-center">
+          <div className="bg-background border border-glass-border rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-6 border-b border-glass-border flex justify-between items-center shrink-0">
               <h2 className="text-xl font-bold">{editingId ? "Edit Event" : "Create New Event"}</h2>
               <button onClick={() => setIsModalOpen(false)} className="text-foreground/50 hover:text-foreground">✕</button>
             </div>
             
-            <form onSubmit={handleSave} className="p-6 space-y-5">
+            <form onSubmit={handleSave} className="p-6 flex-1 overflow-y-auto space-y-5">
               <div>
                 <label className="block text-sm font-bold mb-2 text-foreground/80 uppercase tracking-widest">Event Title</label>
                 <input required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="e.g. Core Team Meet" />
@@ -214,29 +222,80 @@ export const EventsPage = () => {
                 </div>
               </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-bold text-foreground/80 uppercase tracking-widest">Cover Image</label>
-                  {formData.mediaUrl && <button type="button" onClick={() => setFormData({...formData, mediaUrl: ""})} className="text-xs font-bold text-red-500 hover:text-red-400 uppercase tracking-wider">Remove Image</button>}
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-bold mb-2 text-foreground/80 uppercase tracking-widest">Time <span className="text-foreground/40 text-[10px]">(Optional)</span></label>
+                  <input type="text" value={formData.time} onChange={e => setFormData({...formData, time: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="e.g. 10:00 AM - 2:00 PM PST" />
                 </div>
-                
-                {formData.mediaUrl ? (
-                  <div className="w-full h-32 rounded-xl overflow-hidden border border-glass-border bg-glass">
-                     <img src={formData.mediaUrl} alt="Cover Preview" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/800x400?text=Invalid+Image+Link' }} />
-                  </div>
-                ) : (
-                  <div className="flex items-center space-x-3">
-                    <input type="url" value={formData.mediaUrl} onChange={e => setFormData({...formData, mediaUrl: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="Paste link or click upload ->" />
-                    <label className="shrink-0 bg-white/5 hover:bg-white/10 border border-glass-border px-5 py-3 rounded-xl cursor-pointer transition-all font-bold flex items-center space-x-2 text-foreground/80 hover:text-foreground">
-                      <Upload className="w-4 h-4" />
-                      <span className="text-sm">Upload</span>
-                      <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
-                    </label>
-                  </div>
-                )}
+                <div>
+                  <label className="block text-sm font-bold mb-2 text-foreground/80 uppercase tracking-widest">Location <span className="text-foreground/40 text-[10px]">(Optional)</span></label>
+                  <input type="text" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="e.g. Main Auditorium" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold mb-2 text-foreground/80 uppercase tracking-widest">Capacity <span className="text-foreground/40 text-[10px]">(Optional)</span></label>
+                  <input type="number" min="1" value={formData.capacity} onChange={e => setFormData({...formData, capacity: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="e.g. 150" />
+                </div>
               </div>
 
-              <div className="pt-6 flex justify-end space-x-3 border-t border-glass-border mt-6">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-bold text-foreground/80 uppercase tracking-widest">Media</label>
+                  {formData.mediaUrls.length > 0 && <button type="button" onClick={() => setFormData({...formData, mediaUrls: []})} className="text-xs font-bold text-red-500 hover:text-red-400 uppercase tracking-wider">Clear All</button>}
+                </div>
+
+                {/* Image previews grid */}
+                {formData.mediaUrls.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2 mb-3">
+                    {formData.mediaUrls.map((url, i) => (
+                      <div key={i} className="w-full h-24 rounded-xl overflow-hidden border border-glass-border bg-glass relative group">
+                        <img src={url} alt={`Preview ${i}`} className="w-full h-full object-cover" />
+                        <button type="button" onClick={() => setFormData(p => ({...p, mediaUrls: p.mediaUrls.filter((_, idx) => idx !== i)}))} className="absolute top-1 right-1 bg-black/50 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                          <X className="w-3 h-3 text-white" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Always-visible add options */}
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="url"
+                    value={linkInput}
+                    onChange={e => setLinkInput(e.target.value)}
+                    placeholder="Paste image link and press Enter"
+                    className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm"
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (linkInput.trim()) {
+                          setFormData(p => ({ ...p, mediaUrls: [...p.mediaUrls, linkInput.trim()] }));
+                          setLinkInput("");
+                        }
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (linkInput.trim()) {
+                        setFormData(p => ({ ...p, mediaUrls: [...p.mediaUrls, linkInput.trim()] }));
+                        setLinkInput("");
+                      }
+                    }}
+                    className="shrink-0 bg-primary/20 hover:bg-primary/30 border border-primary/30 px-4 py-3 rounded-xl font-bold text-primary text-sm transition-all"
+                  >
+                    Add
+                  </button>
+                  <label className="shrink-0 bg-white/5 hover:bg-white/10 border border-glass-border px-5 py-3 rounded-xl cursor-pointer transition-all font-bold flex items-center space-x-2 text-foreground/80 hover:text-foreground">
+                    <Upload className="w-4 h-4" />
+                    <span className="text-sm">Upload</span>
+                    <input type="file" accept="image/*" multiple onChange={handleFileUpload} className="hidden" />
+                  </label>
+                </div>
+              </div>
+
+              <div className="pt-6 flex justify-end space-x-3 border-t border-glass-border shrink-0 mt-6">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 rounded-xl font-bold hover:bg-foreground/5 transition-colors text-foreground/70">Cancel</button>
                 <button type="submit" disabled={saving} className="px-7 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold transition-all flex items-center shadow-lg shadow-primary/20">
                   {saving ? <Loader className="w-4 h-4 animate-spin" /> : <span>{editingId ? "Update" : "Publish Event"}</span>}
