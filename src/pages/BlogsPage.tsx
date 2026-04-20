@@ -156,7 +156,7 @@ export const BlogsPage = () => {
                       <td className="p-4 text-foreground/70">{blog.author || "Unknown"}</td>
                       <td className="p-4 text-foreground/80">{new Date(blog.createdAt || Date.now()).toLocaleDateString()}</td>
                       <td className="p-4 text-right">
-                        <div className="flex justify-end space-x-2">
+                        <div className="flex justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button onClick={() => openEditModal(blog)} className="p-2 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 rounded-lg transition-colors">
                             <Pencil className="w-4 h-4" />
                           </button>

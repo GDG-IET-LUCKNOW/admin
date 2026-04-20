@@ -13,6 +13,7 @@ import { EventsPage } from './pages/EventsPage';
 import { TeamPage } from './pages/TeamPage';
 import { BlogsPage } from './pages/BlogsPage';
 import { ProjectsPage } from './pages/ProjectsPage';
+import { CommunityStoriesPage } from './pages/CommunityStoriesPage';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
                 <Route path="/team" element={<TeamPage />} />
                 <Route path="/blogs" element={<BlogsPage />} />
                 <Route path="/projects" element={<ProjectsPage />} />
+                <Route path="/stories" element={<CommunityStoriesPage />} />
               </Route>
             </Route>
 

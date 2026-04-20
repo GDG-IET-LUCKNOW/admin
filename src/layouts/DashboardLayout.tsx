@@ -7,7 +7,8 @@ import {
   Users, 
   FileText, 
   LogOut, 
-  Folder
+  Folder,
+  MessageSquare
 } from "lucide-react";
 import clsx from "clsx";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -27,6 +28,7 @@ export const DashboardLayout = () => {
     { name: "Team Members", icon: Users, path: "/team" },
     { name: "Blogs", icon: FileText, path: "/blogs" },
     { name: "Projects", icon: Folder, path: "/projects" },
+    { name: "Community Stories", icon: MessageSquare, path: "/stories" },
   ];
 
   return (
