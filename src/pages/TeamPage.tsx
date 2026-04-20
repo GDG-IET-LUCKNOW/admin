@@ -21,6 +21,7 @@ export const TeamPage = () => {
     year: "",
     github: "",
     linkedin: "",
+    imageUrl: "",
     status: "active",
     priority: 1
   });
@@ -43,7 +44,7 @@ export const TeamPage = () => {
 
   const openAddModal = () => {
     setEditingId(null);
-    setFormData({ name: "", domainName: "", branch: "", year: "", github: "", linkedin: "", status: "active", priority: 1 });
+    setFormData({ name: "", domainName: "", branch: "", year: "", github: "", linkedin: "", imageUrl: "", status: "active", priority: 1 });
     setIsModalOpen(true);
   };
 
@@ -56,6 +57,7 @@ export const TeamPage = () => {
       year: member.year || "",
       github: member.github || "",
       linkedin: member.linkedin || "",
+      imageUrl: member.imageUrl || "",
       status: member.status || "active",
       priority: member.priority || 1
     });
@@ -91,6 +93,18 @@ export const TeamPage = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) { 
+      alert(`File is too large (max 10MB).`); 
+      return; 
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => setFormData(prev => ({ ...prev, imageUrl: reader.result as string }));
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -142,9 +156,15 @@ export const TeamPage = () => {
                       className="hover:bg-white/[0.02] transition-colors group"
                     >
                       <td className="p-4 font-medium flex items-center space-x-3">
-                        <div className="w-8 h-8 rounded-full bg-primary/20 text-primary border border-primary/30 flex items-center justify-center font-bold text-xs uppercase shrink-0">
-                          {member.name.charAt(0)}
-                        </div>
+                        {member.imageUrl ? (
+                          <div className="w-8 h-8 rounded-full shrink-0 overflow-hidden border border-primary/30">
+                            <img src={member.imageUrl} alt={member.name} className="w-full h-full object-cover" />
+                          </div>
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-primary/20 text-primary border border-primary/30 flex items-center justify-center font-bold text-xs uppercase shrink-0">
+                            {member.name.charAt(0)}
+                          </div>
+                        )}
                         <span className="truncate">{member.name}</span>
                       </td>
                       <td className="p-4 text-foreground/70 font-semibold">{member.domainName}</td>
@@ -191,6 +211,29 @@ export const TeamPage = () => {
                 <div>
                   <label className="block text-sm font-medium mb-1.5 text-foreground/80">Domain Name</label>
                   <input required value={formData.domainName} onChange={e => setFormData({...formData, domainName: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="e.g. Web Development" />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <label className="block text-sm font-medium text-foreground/80">Profile Image (Optional)</label>
+                
+                {formData.imageUrl && (
+                  <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-primary/30 mx-auto bg-black/20">
+                    <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                  </div>
+                )}
+
+                <div className="flex gap-4 items-center">
+                  <div className="flex-1">
+                    <input type="url" value={formData.imageUrl} onChange={e => setFormData({...formData, imageUrl: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="Paste Image URL..." />
+                  </div>
+                  <span className="text-foreground/50 text-sm font-medium">OR</span>
+                  <div>
+                    <label className="cursor-pointer px-4 py-3 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 rounded-xl transition-colors font-medium text-sm flex items-center justify-center">
+                      <span>Upload File</span>
+                      <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+                    </label>
+                  </div>
                 </div>
               </div>
               

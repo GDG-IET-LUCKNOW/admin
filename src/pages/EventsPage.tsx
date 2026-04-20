@@ -22,6 +22,7 @@ export const EventsPage = () => {
     location: "",
     capacity: "",
     registrationLink: "",
+    isTBA: false,
     mediaUrls: [] as string[]
   });
   const [linkInput, setLinkInput] = useState("");
@@ -44,7 +45,7 @@ export const EventsPage = () => {
 
   const openAddModal = () => {
     setEditingId(null);
-    setFormData({ title: "", description: "", date: "", time: "", location: "", capacity: "", registrationLink: "", mediaUrls: [] });
+    setFormData({ title: "", description: "", date: "", time: "", location: "", capacity: "", registrationLink: "", isTBA: false, mediaUrls: [] });
     setLinkInput("");
     setIsModalOpen(true);
   };
@@ -59,6 +60,7 @@ export const EventsPage = () => {
       location: event.location || "",
       capacity: event.capacity?.toString() || "",
       registrationLink: event.registrationLink || "",
+      isTBA: event.isTBA || false,
       mediaUrls: event.media?.map((m: any) => m.url) || []
     });
     setLinkInput("");
@@ -85,10 +87,11 @@ export const EventsPage = () => {
       title: formData.title,
       description: formData.description,
       date: formData.date,
-      time: formData.time,
-      location: formData.location,
-      capacity: formData.capacity ? parseInt(formData.capacity) : undefined,
-      registrationLink: formData.registrationLink,
+      time: formData.isTBA ? undefined : formData.time,
+      location: formData.isTBA ? undefined : formData.location,
+      capacity: formData.isTBA ? undefined : (formData.capacity ? parseInt(formData.capacity) : undefined),
+      registrationLink: formData.isTBA ? undefined : formData.registrationLink,
+      isTBA: formData.isTBA,
       media: formData.mediaUrls.map(url => ({ type: "image", url }))
     };
 
@@ -169,9 +172,9 @@ export const EventsPage = () => {
                       className="hover:bg-white/[0.02] transition-colors group"
                     >
                       <td className="p-4 font-medium">{event.title}</td>
-                      <td className="p-4 text-foreground/80">{new Date(event.date).toLocaleDateString()}</td>
-                      <td className="p-4 text-foreground/80">{event.time || "—"}</td>
-                      <td className="p-4 text-foreground/80">{event.location || "—"}</td>
+                      <td className="p-4 text-foreground/80">{event.isTBA ? "TBA" : new Date(event.date).toLocaleDateString()}</td>
+                      <td className="p-4 text-foreground/80">{event.isTBA ? "TBA" : (event.time || "—")}</td>
+                      <td className="p-4 text-foreground/80">{event.isTBA ? "TBA" : (event.location || "—")}</td>
                       <td className="p-4 text-right">
                         <div className="flex justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button onClick={() => openEditModal(event)} className="p-2 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 rounded-lg transition-colors">
@@ -201,6 +204,18 @@ export const EventsPage = () => {
             </div>
             
             <form onSubmit={handleSave} className="p-6 flex-1 overflow-y-auto space-y-5">
+              <div className="flex items-center space-x-3 bg-primary/10 p-4 rounded-xl border border-primary/20">
+                <input 
+                  type="checkbox" 
+                  id="tba-check"
+                  checked={formData.isTBA} 
+                  onChange={e => setFormData({...formData, isTBA: e.target.checked})} 
+                  className="w-5 h-5 accent-primary cursor-pointer"
+                />
+                <label htmlFor="tba-check" className="text-sm font-bold text-primary uppercase tracking-widest cursor-pointer select-none">To Be Announced (TBA)</label>
+                <span className="text-xs text-foreground/50 ml-2">Hide date, time, and location until ready.</span>
+              </div>
+
               <div>
                 <label className="block text-sm font-bold mb-2 text-foreground/80 uppercase tracking-widest">Event Title</label>
                 <input required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="e.g. Core Team Meet" />
@@ -211,31 +226,35 @@ export const EventsPage = () => {
                 <textarea required value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} rows={3} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm resize-none" placeholder="Provide event details..." />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-bold mb-2 text-foreground/80 uppercase tracking-widest">Date</label>
-                  <input type="date" required value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold mb-2 text-foreground/80 uppercase tracking-widest">Registration Link</label>
-                  <input type="url" value={formData.registrationLink} onChange={e => setFormData({...formData, registrationLink: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="https://..." />
-                </div>
-              </div>
+              {!formData.isTBA && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-bold mb-2 text-foreground/80 uppercase tracking-widest">Date</label>
+                      <input type="date" required={!formData.isTBA} value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold mb-2 text-foreground/80 uppercase tracking-widest">Registration Link</label>
+                      <input type="url" value={formData.registrationLink} onChange={e => setFormData({...formData, registrationLink: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="https://..." />
+                    </div>
+                  </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-bold mb-2 text-foreground/80 uppercase tracking-widest">Time <span className="text-foreground/40 text-[10px]">(Optional)</span></label>
-                  <input type="text" value={formData.time} onChange={e => setFormData({...formData, time: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="e.g. 10:00 AM - 2:00 PM PST" />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold mb-2 text-foreground/80 uppercase tracking-widest">Location <span className="text-foreground/40 text-[10px]">(Optional)</span></label>
-                  <input type="text" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="e.g. Main Auditorium" />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold mb-2 text-foreground/80 uppercase tracking-widest">Capacity <span className="text-foreground/40 text-[10px]">(Optional)</span></label>
-                  <input type="number" min="1" value={formData.capacity} onChange={e => setFormData({...formData, capacity: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="e.g. 150" />
-                </div>
-              </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-bold mb-2 text-foreground/80 uppercase tracking-widest">Time <span className="text-foreground/40 text-[10px]">(Optional)</span></label>
+                      <input type="text" value={formData.time} onChange={e => setFormData({...formData, time: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="e.g. 10:00 AM - 2:00 PM PST" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold mb-2 text-foreground/80 uppercase tracking-widest">Location <span className="text-foreground/40 text-[10px]">(Optional)</span></label>
+                      <input type="text" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="e.g. Main Auditorium" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold mb-2 text-foreground/80 uppercase tracking-widest">Capacity <span className="text-foreground/40 text-[10px]">(Optional)</span></label>
+                      <input type="number" min="1" value={formData.capacity} onChange={e => setFormData({...formData, capacity: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="e.g. 150" />
+                    </div>
+                  </div>
+                </>
+              )}
 
               <div>
                 <div className="flex items-center justify-between mb-2">
