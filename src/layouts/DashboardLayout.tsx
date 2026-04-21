@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { 
@@ -12,10 +12,20 @@ import {
 } from "lucide-react";
 import clsx from "clsx";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useTheme } from "next-themes";
 
 export const DashboardLayout = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const { theme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const currentTheme = theme === "system" ? resolvedTheme : theme;
+  const logoSrc = mounted && currentTheme === "dark" ? "/logo-dark.png" : "/logo-light.jpg";
 
   const handleLogout = () => {
     logout();
@@ -36,9 +46,14 @@ export const DashboardLayout = () => {
       {/* Sidebar */}
       <aside className="w-64 bg-glass border-r border-glass-border backdrop-blur-xl flex flex-col fixed inset-y-0 z-50">
         <div className="h-20 flex justify-between items-center px-6 border-b border-glass-border">
-          <div className="flex flex-col justify-center">
-            <span className="font-bold text-2xl tracking-tight text-foreground leading-tight">IETECH</span>
-            <span className="font-medium text-[11px] tracking-widest text-primary uppercase mt-0.5">Admin Panel</span>
+          <div className="flex items-center space-x-3">
+            <div>
+              <img src={logoSrc} alt="IETECH Logo" className="w-8 h-8 object-contain drop-shadow-md rounded-lg" />
+            </div>
+            <div className="flex flex-col justify-center">
+              <span className="font-bold text-2xl tracking-tight text-foreground leading-tight">IETECH</span>
+              <span className="font-medium text-[11px] tracking-widest text-primary uppercase mt-0.5">Admin Panel</span>
+            </div>
           </div>
           <ThemeToggle />
         </div>
