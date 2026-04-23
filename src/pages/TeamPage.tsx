@@ -10,6 +10,10 @@ export const TeamPage = () => {
 
   const getDirectImageUrl = (url: string) => {
     if (!url) return "";
+    // If it's already a direct lh3 link, return as is (but ensure it has size)
+    if (url.includes('googleusercontent.com/d/')) {
+      return url.includes('=w') ? url : `${url}=w1000`;
+    }
     if (url.includes('drive.google.com') || url.includes('googleusercontent.com')) {
       const idMatch = url.match(/id=([^&]+)/) || url.match(/\/d\/([^/&?]+)/) || url.match(/\/d\/([^=]+)/);
       if (idMatch) return `https://lh3.googleusercontent.com/d/${idMatch[1]}=w1000`;
@@ -241,7 +245,17 @@ export const TeamPage = () => {
 
                 <div className="flex gap-4 items-center">
                   <div className="flex-1">
-                    <input type="url" value={formData.imageUrl} onChange={e => setFormData({...formData, imageUrl: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="Paste Image URL..." />
+                    <input type="url" value={formData.imageUrl} onChange={e => {
+                      const val = e.target.value;
+                      if (val.includes('drive.google.com')) {
+                        const idMatch = val.match(/id=([^&]+)/) || val.match(/\/d\/([^/&?]+)/);
+                        if (idMatch) {
+                          setFormData({...formData, imageUrl: `https://lh3.googleusercontent.com/d/${idMatch[1]}=w1000`});
+                          return;
+                        }
+                      }
+                      setFormData({...formData, imageUrl: val});
+                    }} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="Paste Image URL..." />
                   </div>
                 </div>
               </div>
