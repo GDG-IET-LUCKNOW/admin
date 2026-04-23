@@ -7,6 +7,15 @@ import { TextScramble } from "@/components/ui/text-scramble";
 export const TeamPage = () => {
   const [team, setTeam] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const getDirectImageUrl = (url: string) => {
+    if (!url) return "";
+    if (url.includes('drive.google.com') || url.includes('googleusercontent.com')) {
+      const idMatch = url.match(/id=([^&]+)/) || url.match(/\/d\/([^/&?]+)/) || url.match(/\/d\/([^=]+)/);
+      if (idMatch) return `https://lh3.googleusercontent.com/d/${idMatch[1]}=w1000`;
+    }
+    return url;
+  };
   
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -95,17 +104,7 @@ export const TeamPage = () => {
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 10 * 1024 * 1024) { 
-      alert(`File is too large (max 10MB).`); 
-      return; 
-    }
-    const reader = new FileReader();
-    reader.onloadend = () => setFormData(prev => ({ ...prev, imageUrl: reader.result as string }));
-    reader.readAsDataURL(file);
-  };
+
 
   return (
     <div>
@@ -218,21 +217,31 @@ export const TeamPage = () => {
                 <label className="block text-sm font-medium text-foreground/80">Profile Image (Optional)</label>
                 
                 {formData.imageUrl && (
-                  <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-primary/30 mx-auto bg-black/20">
-                    <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                  <div className="w-40 h-40 rounded-2xl overflow-hidden border-2 border-primary/30 mx-auto bg-black/20 flex items-center justify-center">
+                    <img 
+                      src={getDirectImageUrl(formData.imageUrl)} 
+                      alt="Preview" 
+                      referrerPolicy="no-referrer"
+                      className="max-w-full max-h-full object-contain" 
+                      onError={(e) => {
+                        if (!formData.imageUrl.includes('drive.google.com')) {
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.parentElement!.classList.add('bg-red-500/10');
+                          if (!e.currentTarget.parentElement!.querySelector('.error-msg')) {
+                            const msg = document.createElement('span');
+                            msg.className = 'error-msg text-xs text-red-500 font-bold uppercase text-center px-4';
+                            msg.innerText = 'Invalid Image Link';
+                            e.currentTarget.parentElement!.appendChild(msg);
+                          }
+                        }
+                      }} 
+                    />
                   </div>
                 )}
 
                 <div className="flex gap-4 items-center">
                   <div className="flex-1">
                     <input type="url" value={formData.imageUrl} onChange={e => setFormData({...formData, imageUrl: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="Paste Image URL..." />
-                  </div>
-                  <span className="text-foreground/50 text-sm font-medium">OR</span>
-                  <div>
-                    <label className="cursor-pointer px-4 py-3 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 rounded-xl transition-colors font-medium text-sm flex items-center justify-center">
-                      <span>Upload File</span>
-                      <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
-                    </label>
                   </div>
                 </div>
               </div>

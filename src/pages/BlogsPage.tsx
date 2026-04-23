@@ -1,12 +1,21 @@
 import React, { useState, useEffect } from "react";
 import api from "@/api";
-import { Plus, Pencil, Trash, Loader, Upload, X } from "lucide-react";
+import { Plus, Pencil, Trash, Loader, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TextScramble } from "@/components/ui/text-scramble";
 
 export const BlogsPage = () => {
   const [blogs, setBlogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const getDirectImageUrl = (url: string) => {
+    if (!url) return "";
+    if (url.includes('drive.google.com') || url.includes('googleusercontent.com')) {
+      const idMatch = url.match(/id=([^&]+)/) || url.match(/\/d\/([^/&?]+)/) || url.match(/\/d\/([^=]+)/);
+      if (idMatch) return `https://lh3.googleusercontent.com/d/${idMatch[1]}=w1000`;
+    }
+    return url;
+  };
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -93,17 +102,7 @@ export const BlogsPage = () => {
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-    
-    files.forEach(file => {
-      if (file.size > 10 * 1024 * 1024) { alert(`File ${file.name} is too large (max 10MB).`); return; }
-      const reader = new FileReader();
-      reader.onloadend = () => setFormData(prev => ({ ...prev, mediaUrls: [...prev.mediaUrls, reader.result as string] }));
-      reader.readAsDataURL(file);
-    });
-  };
+
 
   return (
     <div>
@@ -202,11 +201,28 @@ export const BlogsPage = () => {
 
                 {/* Image previews grid */}
                 {formData.mediaUrls.length > 0 && (
-                  <div className="grid grid-cols-3 gap-2 mb-3">
+                  <div className="grid grid-cols-3 gap-3 mb-3">
                     {formData.mediaUrls.map((url, i) => (
-                      <div key={i} className="w-full h-24 rounded-xl overflow-hidden border border-glass-border bg-glass relative group">
-                        <img src={url} alt={`Preview ${i}`} className="w-full h-full object-cover" />
-                        <button type="button" onClick={() => setFormData(p => ({...p, mediaUrls: p.mediaUrls.filter((_, idx) => idx !== i)}))} className="absolute top-1 right-1 bg-black/50 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div key={i} className="w-full aspect-video rounded-xl overflow-hidden border border-glass-border bg-black/40 relative group flex items-center justify-center">
+                        <img 
+                          src={getDirectImageUrl(url)} 
+                          alt={`Preview ${i}`} 
+                          referrerPolicy="no-referrer"
+                          className="w-full h-full object-cover" 
+                          onError={(e) => {
+                            if (!url.includes('drive.google.com')) {
+                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.parentElement!.classList.add('bg-red-500/10');
+                              if (!e.currentTarget.parentElement!.querySelector('.err-msg')) {
+                                const msg = document.createElement('span');
+                                msg.className = 'err-msg text-[10px] text-red-500 font-bold uppercase text-center px-2';
+                                msg.innerText = 'Invalid Image Link';
+                                e.currentTarget.parentElement!.appendChild(msg);
+                              }
+                            }
+                          }}
+                        />
+                        <button type="button" onClick={() => setFormData(p => ({...p, mediaUrls: p.mediaUrls.filter((_, idx) => idx !== i)}))} className="absolute top-1 right-1 bg-black/60 p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-red-500 transition-colors">
                           <X className="w-3 h-3 text-white" />
                         </button>
                       </div>
@@ -244,12 +260,8 @@ export const BlogsPage = () => {
                   >
                     Add
                   </button>
-                  <label className="shrink-0 bg-white/5 hover:bg-white/10 border border-glass-border px-5 py-3 rounded-xl cursor-pointer transition-all font-bold flex items-center space-x-2 text-foreground/80 hover:text-foreground">
-                    <Upload className="w-4 h-4" />
-                    <span className="text-sm">Upload</span>
-                    <input type="file" accept="image/*" multiple onChange={handleFileUpload} className="hidden" />
-                  </label>
                 </div>
+                <p className="mt-2 text-[10px] text-foreground/40 font-medium uppercase tracking-wider italic">* Use direct image URLs (e.g., https://site.com/image.png)</p>
               </div>
               
               <div className="flex-1 flex flex-col h-40 mt-4">
