@@ -61,7 +61,7 @@ export const ProjectsPage = () => {
 
   const openAddModal = () => {
     setEditingId(null);
-    setFormData({ title: "", description: "", githubLink: "", techStack: "", mediaUrls: [] });
+    setFormData({ title: "", description: "", githubLink: "", liveLink: "", techStack: "", mediaUrls: [] });
     setLinkInput("");
     setIsModalOpen(true);
   };
