@@ -240,7 +240,7 @@ export const EventsPage = () => {
                       <input type="date" required={!formData.isTBA} value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" />
                     </div>
                     <div>
-                      <label className="block text-sm font-bold mb-2 text-foreground/80 uppercase tracking-widest">Registration Link</label>
+                      <label className="block text-sm font-bold mb-2 text-foreground/80 uppercase tracking-widest">Registration Link <span className="text-foreground/40 text-[10px]">(Optional)</span></label>
                       <input type="url" value={formData.registrationLink} onChange={e => setFormData({...formData, registrationLink: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="https://..." />
                     </div>
                   </div>

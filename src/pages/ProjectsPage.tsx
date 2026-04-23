@@ -4,6 +4,12 @@ import { Plus, Pencil, Trash, Loader, Globe, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TextScramble } from "@/components/ui/text-scramble";
 
+const GithubIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+  </svg>
+);
+
 export const ProjectsPage = () => {
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,6 +37,7 @@ export const ProjectsPage = () => {
     title: "",
     description: "",
     githubLink: "",
+    liveLink: "",
     techStack: "",
     mediaUrls: [] as string[]
   });
@@ -65,6 +72,7 @@ export const ProjectsPage = () => {
       title: project.title,
       description: project.description,
       githubLink: project.githubLink || "",
+      liveLink: project.liveLink || "",
       techStack: Array.isArray(project.techStack) ? project.techStack.join(", ") : project.techStack || "",
       mediaUrls: project.media?.map((m: any) => m.url) || []
     });
@@ -91,6 +99,7 @@ export const ProjectsPage = () => {
       title: formData.title,
       description: formData.description,
       githubLink: formData.githubLink,
+      liveLink: formData.liveLink,
       techStack: formData.techStack.split(",").map(t => t.trim()).filter(Boolean),
       media: formData.mediaUrls.map(url => ({ type: "image", url }))
     };
@@ -173,11 +182,18 @@ export const ProjectsPage = () => {
                         </div>
                       </td>
                       <td className="p-4">
-                        {project.githubLink && (
-                          <a href={project.githubLink} target="_blank" rel="noreferrer" className="text-primary hover:underline text-xs flex items-center font-semibold">
-                            <Globe className="w-3 h-3 mr-1.5" /> Source
-                          </a>
-                        )}
+                        <div className="flex flex-col space-y-1">
+                          {project.githubLink && (
+                            <a href={project.githubLink} target="_blank" rel="noreferrer" className="text-foreground/70 hover:text-primary text-xs flex items-center font-semibold transition-colors">
+                              <GithubIcon className="w-3 h-3 mr-1.5" /> Source
+                            </a>
+                          )}
+                          {project.liveLink && (
+                            <a href={project.liveLink} target="_blank" rel="noreferrer" className="text-primary hover:underline text-xs flex items-center font-semibold">
+                              <Globe className="w-3 h-3 mr-1.5" /> Live
+                            </a>
+                          )}
+                        </div>
                       </td>
                       <td className="p-4 text-right">
                         <div className="flex justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -224,8 +240,13 @@ export const ProjectsPage = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-bold mb-2 text-foreground/80 uppercase tracking-widest">GitHub Repository</label>
+                <label className="block text-sm font-bold mb-2 text-foreground/80 uppercase tracking-widest">GitHub Repository (Optional)</label>
                 <input type="url" value={formData.githubLink} onChange={e => setFormData({...formData, githubLink: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="https://github.com/..." />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold mb-2 text-foreground/80 uppercase tracking-widest">Live Preview Link (Optional)</label>
+                <input type="url" value={formData.liveLink} onChange={e => setFormData({...formData, liveLink: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="https://project-demo.com" />
               </div>
 
               <div>
