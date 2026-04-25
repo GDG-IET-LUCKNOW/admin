@@ -3,6 +3,18 @@ import api from "@/api";
 import { Plus, Pencil, Trash, Loader, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TextScramble } from "@/components/ui/text-scramble";
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
+
+const quillModules = {
+  toolbar: [
+    [{ 'header': [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+    [{'list': 'ordered'}, {'list': 'bullet'}],
+    [{ 'color': [] }, { 'background': [] }],
+    ['link', 'clean']
+  ],
+};
 
 export const BlogsPage = () => {
   const [blogs, setBlogs] = useState<any[]>([]);
@@ -278,9 +290,18 @@ export const BlogsPage = () => {
                 <p className="mt-2 text-[10px] text-foreground/40 font-medium uppercase tracking-wider italic">* Use direct image URLs (e.g., https://site.com/image.png)</p>
               </div>
               
-              <div className="flex-1 flex flex-col h-40 mt-4">
-                <label className="block text-sm font-bold mb-2 text-foreground/80 uppercase tracking-widest">Content (Markdown)</label>
-                <textarea required value={formData.content} onChange={e => setFormData({...formData, content: e.target.value})} className="w-full flex-1 px-4 py-4 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm resize-none" placeholder="Write your content here... Use bold, asterisks, etc." />
+              <div className="flex-1 flex flex-col h-80 mt-4">
+                <label className="block text-sm font-bold mb-2 text-foreground/80 uppercase tracking-widest">Content</label>
+                <div className="flex-1 bg-foreground/5 border border-glass-border rounded-xl overflow-hidden [&_.quill]:h-[calc(100%-42px)] [&_.ql-toolbar]:border-none [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-glass-border [&_.ql-container]:border-none [&_.ql-editor]:text-foreground [&_.ql-editor]:font-medium [&_.ql-editor]:text-sm">
+                  <ReactQuill 
+                    theme="snow" 
+                    value={formData.content} 
+                    onChange={val => setFormData({...formData, content: val})} 
+                    modules={quillModules}
+                    className="h-full"
+                    placeholder="Write your content here... Use the toolbar to style."
+                  />
+                </div>
               </div>
 
               <div className="pt-6 flex justify-end space-x-3 border-t border-glass-border shrink-0 mt-6">
