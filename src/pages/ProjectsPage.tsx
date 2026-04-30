@@ -3,6 +3,18 @@ import api from "@/api";
 import { Plus, Pencil, Trash, Loader, Globe, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TextScramble } from "@/components/ui/text-scramble";
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
+
+const quillModules = {
+  toolbar: [
+    [{ 'header': [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+    [{'list': 'ordered'}, {'list': 'bullet'}],
+    [{ 'color': [] }, { 'background': [] }],
+    ['link', 'clean']
+  ],
+};
 
 const GithubIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor" stroke="none">
@@ -229,9 +241,18 @@ export const ProjectsPage = () => {
                 <input required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm" placeholder="e.g., Campus Utility App" />
               </div>
               
-              <div>
+              <div className="flex-1 flex flex-col min-h-[250px]">
                 <label className="block text-sm font-bold mb-2 text-foreground/80 uppercase tracking-widest">Description</label>
-                <textarea required value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} rows={3} className="w-full px-4 py-3 bg-foreground/5 border border-glass-border text-foreground rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-foreground/40 placeholder:font-normal font-medium text-sm resize-none" placeholder="Explain what the project does..." />
+                <div className="flex-1 bg-foreground/5 border border-glass-border rounded-xl overflow-hidden [&_.quill]:h-[calc(100%-42px)] [&_.ql-toolbar]:border-none [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-glass-border [&_.ql-container]:border-none [&_.ql-editor]:text-foreground [&_.ql-editor]:font-medium [&_.ql-editor]:text-sm">
+                  <ReactQuill 
+                    theme="snow" 
+                    value={formData.description} 
+                    onChange={val => setFormData({...formData, description: val})} 
+                    modules={quillModules}
+                    className="h-full"
+                    placeholder="Explain what the project does... Use the toolbar to style."
+                  />
+                </div>
               </div>
 
               <div>
